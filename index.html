@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>新概念单词本</title>
+<meta name="theme-color" content="#EDEFED" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141A1C" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="单词本">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap">
+<style>
+/* Layout: one calm column; tab bar on top, practice takes over the column; keyboard-first on desktop, thumb-sized on phone */
+:root{
+  --bg:#EDEFED; --surface:#F8F9F7; --ink:#1F2629; --muted:#66706F; --line:#D6DBD7;
+  --sea:#3F6670; --sea-soft:#DCE6E6; --err:#A5503F; --err-soft:#F2E3DE; --ok:#4E7A5A; --ok-soft:#E1ECE3; --star:#B07F2E;
+  --f-en:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-zh:-apple-system,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141A1C; --surface:#1C2427; --ink:#E3E8E6; --muted:#93A09E; --line:#2D383B;
+  --sea:#8DB3BC; --sea-soft:#22363A; --err:#DE8F7B; --err-soft:#3A2622; --ok:#8DBB97; --ok-soft:#1F3226; --star:#D9AE62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A1C; --surface:#1C2427; --ink:#E3E8E6; --muted:#93A09E; --line:#2D383B;
+  --sea:#8DB3BC; --sea-soft:#22363A; --err:#DE8F7B; --err-soft:#3A2622; --ok:#8DBB97; --ok-soft:#1F3226; --star:#D9AE62; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-zh);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:720px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 0;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{margin:0;font-size:20px;font-weight:600;letter-spacing:.02em}
+.brand small{font-family:var(--f-en);font-style:italic;color:var(--muted);font-size:14px}
+nav.tabs{display:flex;gap:2px;margin-top:10px;overflow-x:auto}
+nav.tabs button{background:none;border:0;padding:8px 12px 10px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+nav.tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--sea)}
+main{padding-top:22px;display:grid;gap:22px}
+h2{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.08em;margin:0 0 10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{background:var(--surface);padding:14px 12px}
+.stat b{display:block;font-family:var(--f-en);font-size:28px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.stats{grid-template-columns:repeat(3,1fr)}.stat b{font-size:24px}}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:grid;gap:8px;margin-bottom:16px}
+.field>label,.field>.lab{font-size:13px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--surface);border:0;border-right:1px solid var(--line);padding:7px 14px;min-height:38px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--sea);color:var(--surface)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:6px;min-width:44px;padding:5px 8px;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:13px}
+.chip[aria-pressed="true"]{background:var(--sea-soft);border-color:var(--sea);color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;min-height:40px}
+.btn.primary{background:var(--sea);border-color:var(--sea);color:var(--surface);font-weight:600}
+.btn.warn{color:var(--err);border-color:var(--err)}
+.btn:disabled{opacity:.45;cursor:default}
+.link{background:none;border:0;color:var(--sea);padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.due{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.due p{margin:0}
+kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--muted);background:var(--bg)}
+/* practice */
+.pbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.track{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:10px}
+.track i{display:block;height:100%;background:var(--sea);transition:width .2s}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 7px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px 22px;display:grid;gap:18px;text-align:center}
+.prompt-zh{font-size:28px;font-weight:600;line-height:1.35}
+.pattern{font-family:var(--f-mono);letter-spacing:.12em;color:var(--muted);font-size:16px;white-space:pre-wrap;word-break:break-all}
+.speak{width:84px;height:84px;border-radius:50%;border:1px solid var(--sea);background:var(--sea-soft);color:var(--sea);display:grid;place-items:center;margin:0 auto}
+.speak svg{width:34px;height:34px}
+.answer-in{width:100%;font-family:var(--f-mono);font-size:26px;text-align:center;padding:12px;border:0;border-bottom:2px solid var(--line);background:transparent;outline:none;border-radius:0}
+.answer-in:focus{border-bottom-color:var(--sea)}
+.answer-in.bad{border-bottom-color:var(--err);animation:shake .25s}
+.answer-in.good{border-bottom-color:var(--ok);color:var(--ok)}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.answer-in.bad{animation:none}.track i{transition:none}}
+.fb{min-height:24px;font-size:14px}
+.fb.bad{color:var(--err)} .fb.good{color:var(--ok)}
+.reveal{display:grid;gap:4px;justify-items:center;padding:14px;border-radius:10px;background:var(--bg)}
+.reveal .en{font-family:var(--f-en);font-size:34px;font-weight:600;line-height:1.15}
+.reveal .ipa{font-family:var(--f-en);color:var(--muted);font-size:17px}
+.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.keys{font-size:12px;color:var(--muted);text-align:center}
+.star{background:none;border:1px solid var(--line);border-radius:8px;min-height:40px;padding:6px 12px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.star[aria-pressed="true"]{color:var(--star);border-color:var(--star)}
+.star svg{width:16px;height:16px}
+.icon-btn{background:none;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;display:inline-grid;place-items:center;color:var(--sea);flex:none}
+.icon-btn svg{width:16px;height:16px}
+.icon-btn.on{color:var(--star);border-color:var(--star)}
+/* lists */
+.list{display:grid;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .w{min-width:0}
+.item .en{font-family:var(--f-en);font-size:19px;font-weight:600}
+.item .ipa{font-family:var(--f-en);color:var(--muted);font-size:14px;margin-left:6px}
+.item .zh{font-size:14px}
+.item .meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.item .ops{display:flex;gap:6px;align-items:center}
+.pill{font-size:11px;border-radius:999px;padding:1px 8px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.learning{border-color:var(--sea);color:var(--sea)}
+.pill.mastered{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.pill.bad{border-color:var(--err);color:var(--err)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input,.toolbar select,.form input,select.sel{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;min-height:40px;min-width:0}
+.toolbar input{flex:1 1 180px}
+.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.form{grid-template-columns:1fr 1fr}}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px;font-family:var(--f-mono);font-size:12px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.bars{display:grid;gap:6px}
+.bars .r{display:grid;grid-template-columns:52px 1fr 92px;gap:10px;align-items:center;font-size:13px;font-variant-numeric:tabular-nums}
+.bars .b{height:10px;background:var(--line);border-radius:3px;overflow:hidden}
+.bars .b i{display:block;height:100%;background:var(--sea)}
+.notice{border-left:3px solid var(--err);background:var(--err-soft);padding:10px 14px;border-radius:6px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;z-index:20;max-width:90vw}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.sum div{background:var(--surface);padding:14px;text-align:center}
+.sum b{display:block;font-family:var(--f-en);font-size:30px;font-variant-numeric:tabular-nums}
+.sum span{font-size:12px;color:var(--muted)}
+p{margin:0 0 8px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>新概念单词本</h1><small>New Concept English · Book 1</small></div>
+    <nav class="tabs" id="tabs"></nav>
+  </header>
+  <main id="app"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const LT={"1":"Excuse me!","3":"Sorry, sir.","5":"Nice to meet you.","7":"Are you a teacher?","9":"How are you today?","11":"Is this your shirt?","13":"A new dress","15":"Your passports, please.","17":"How do you do?","19":"Tired and thirsty","21":"Which book?","23":"Which glasses?","25":"Mrs Smith's kitchen","27":"Mrs Smith's living room","29":"Come in, Amy.","31":"Where's Sally?","33":"A fine day","35":"Our village","37":"Making a bookcase","39":"Don't drop it!","41":"Penny's bag","43":"Hurry up!","45":"The boss's letter","47":"A cup of coffee","49":"At the butcher's","51":"A pleasant climate","53":"An interesting climate","55":"The Sawyer family","57":"An unusual day","59":"Is that all?","61":"A bad cold","63":"Thank you, doctor.","65":"Not a baby","67":"The weekend","69":"The car race","71":"He's awful!"};
+const RAW=[[1,"excuse","原谅","ɪkˈskjuːz"],[1,"me","我（宾格）","miː"],[1,"yes","是的","jes"],[1,"this","这","ðɪs"],[1,"your","你的，你们的","jʊr"],[1,"handbag","女用手提包","ˈhændbæɡ"],[1,"pardon","原谅，请再说一遍","ˈpɑːrdən"],[1,"it","它","ɪt"],[1,"thank you","谢谢你","ˈθæŋk juː"],[1,"very much","非常地","ˈveri mʌtʃ"],[1,"pen","钢笔","pen"],[1,"pencil","铅笔","ˈpensəl"],[1,"watch","手表","wɑːtʃ"],[1,"coat","上衣，外衣","koʊt"],[1,"skirt","裙子","skɝːt"],[1,"shirt","衬衫","ʃɝːt"],[1,"house","房子","haʊs"],[3,"umbrella","伞","ʌmˈbrelə"],[3,"please","请","pliːz"],[3,"here","这里","hɪr"],[3,"my","我的","maɪ"],[3,"ticket","票","ˈtɪkɪt"],[3,"number","号码","ˈnʌmbɚ"],[3,"five","五","faɪv"],[3,"sorry","对不起","ˈsɑːri"],[3,"sir","先生","sɝː"],[3,"cloakroom","衣帽存放处","ˈkloʊkruːm"],[3,"suit","一套衣服","suːt"],[3,"school","学校","skuːl"],[3,"teacher","老师","ˈtiːtʃɚ"],[3,"son","儿子","sʌn"],[3,"daughter","女儿","ˈdɑːt̬ɚ"],[5,"Mr.","先生","ˈmɪstɚ"],[5,"good","好","ɡʊd"],[5,"morning","早晨","ˈmɔːrnɪŋ"],[5,"Miss","小姐","mɪs"],[5,"new","新的","nuː"],[5,"student","学生","ˈstuːdənt"],[5,"French","法国人，法国的","frentʃ"],[5,"German","德国人，德国的","ˈdʒɝːmən"],[5,"nice","美好的","naɪs"],[5,"meet","遇见","miːt"],[5,"Japanese","日本人，日本的","ˌdʒæpəˈniːz"],[5,"Korean","韩国人，韩国的","kəˈriːən"],[5,"Chinese","中国人，中国的","tʃaɪˈniːz"],[5,"too","也","tuː"],[5,"make","牌子","meɪk"],[5,"English","英国人，英国的","ˈɪŋɡlɪʃ"],[5,"American","美国人，美国的","əˈmerɪkən"],[5,"Italian","意大利人，意大利的","ɪˈtæljən"],[7,"I","我","aɪ"],[7,"am","是","æm"],[7,"are","是","ɑːr"],[7,"name","名字","neɪm"],[7,"what","什么","wɑːt"],[7,"nationality","国籍","ˌnæʃəˈnælət̬i"],[7,"job","工作","dʒɑːb"],[7,"engineer","工程师","ˌendʒɪˈnɪr"],[7,"policeman","警察","pəˈliːsmən"],[7,"taxi driver","出租车司机","ˈtæksi ˌdraɪvɚ"],[7,"postman","邮递员","ˈpoʊstmən"],[7,"nurse","护士","nɝːs"],[7,"mechanic","机械师","məˈkænɪk"],[7,"hairdresser","理发师","ˈherˌdresɚ"],[7,"housewife","家庭主妇","ˈhaʊswaɪf"],[9,"hello","喂，你好","heˈloʊ"],[9,"hi","你好","haɪ"],[9,"how","怎样","haʊ"],[9,"today","今天","təˈdeɪ"],[9,"well","身体好","wel"],[9,"fine","美好的","faɪn"],[9,"thanks","谢谢","θæŋks"],[9,"goodbye","再见","ɡʊdˈbaɪ"],[9,"see","见","siː"],[9,"fat","胖的","fæt"],[9,"thin","瘦的","θɪn"],[9,"tall","高的","tɑːl"],[9,"short","矮的","ʃɔːrt"],[9,"dirty","脏的","ˈdɝːt̬i"],[9,"clean","干净的","kliːn"],[9,"hot","热的","hɑːt"],[9,"cold","冷的","koʊld"],[9,"old","老的","oʊld"],[9,"young","年轻的","jʌŋ"],[9,"busy","忙的","ˈbɪzi"],[9,"lazy","懒的","ˈleɪzi"],[11,"whose","谁的","huːz"],[11,"blue","蓝色的","bluː"],[11,"perhaps","大概","pɚˈhæps"],[11,"white","白色的","waɪt"],[11,"catch","抓住","kætʃ"],[11,"father","父亲","ˈfɑːðɚ"],[11,"mother","母亲","ˈmʌðɚ"],[11,"blouse","女衬衫","blaʊs"],[11,"sister","姐妹","ˈsɪstɚ"],[11,"tie","领带","taɪ"],[11,"brother","兄弟","ˈbrʌðɚ"],[11,"his","他的","hɪz"],[11,"her","她的","hɝː"],[13,"colour","颜色","ˈkʌlɚ"],[13,"green","绿色","ɡriːn"],[13,"come","来","kʌm"],[13,"upstairs","楼上","ʌpˈsterz"],[13,"smart","时髦的","smɑːrt"],[13,"hat","帽子","hæt"],[13,"same","相同的","seɪm"],[13,"lovely","可爱的","ˈlʌvli"],[13,"case","箱子","keɪs"],[13,"carpet","地毯","ˈkɑːrpɪt"],[13,"dog","狗","dɑːɡ"],[13,"grey","灰色","ɡreɪ"],[13,"yellow","黄色","ˈjeloʊ"],[13,"black","黑色","blæk"],[13,"orange","橘黄色","ˈɔːrɪndʒ"],[13,"red","红色","red"],[13,"brown","棕色","braʊn"],[15,"customs","海关","ˈkʌstəmz"],[15,"officer","官员","ˈɑːfɪsɚ"],[15,"girl","女孩","ɡɝːl"],[15,"Danish","丹麦人，丹麦的","ˈdeɪnɪʃ"],[15,"friend","朋友","frend"],[15,"Norwegian","挪威人，挪威的","nɔːrˈwiːdʒən"],[15,"passport","护照","ˈpæspɔːrt"],[15,"tourist","旅游者","ˈtʊrɪst"],[17,"employee","雇员","ɪmˈplɔɪiː"],[17,"hard-working","勤奋的","ˌhɑːrdˈwɝːkɪŋ"],[17,"sales rep","推销员","ˈseɪlz rep"],[17,"man","男人","mæn"],[17,"office","办公室","ˈɑːfɪs"],[17,"assistant","助手","əˈsɪstənt"],[17,"woman","女人","ˈwʊmən"],[19,"matter","事情","ˈmæt̬ɚ"],[19,"children","孩子们","ˈtʃɪldrən"],[19,"tired","累的","taɪrd"],[19,"boy","男孩","bɔɪ"],[19,"thirsty","渴的","ˈθɝːsti"],[19,"mum","妈妈","mʌm"],[19,"sit down","坐下","sɪt ˈdaʊn"],[19,"right","好，可以","raɪt"],[19,"ice cream","冰淇淋","ˈaɪs kriːm"],[19,"big","大的","bɪɡ"],[19,"small","小的","smɑːl"],[19,"open","开着的","ˈoʊpən"],[19,"shut","关着的","ʃʌt"],[19,"light","轻的","laɪt"],[19,"heavy","重的","ˈhevi"],[19,"long","长的","lɑːŋ"],[19,"shoe","鞋","ʃuː"],[21,"give","给","ɡɪv"],[21,"one","一个","wʌn"],[21,"which","哪一个","wɪtʃ"],[21,"empty","空的","ˈempti"],[21,"full","满的","fʊl"],[21,"large","大的","lɑːrdʒ"],[21,"little","小的","ˈlɪt̬əl"],[21,"sharp","尖的，锋利的","ʃɑːrp"],[21,"blunt","钝的","blʌnt"],[21,"box","盒子","bɑːks"],[21,"glass","玻璃杯","ɡlæs"],[21,"cup","茶杯","kʌp"],[21,"bottle","瓶子","ˈbɑːt̬əl"],[21,"tin","罐头","tɪn"],[21,"knife","刀","naɪf"],[21,"fork","叉子","fɔːrk"],[23,"on","在…之上","ɑːn"],[23,"shelf","架子","ʃelf"],[23,"desk","书桌","desk"],[23,"table","桌子","ˈteɪbəl"],[23,"plate","盘子","pleɪt"],[23,"cupboard","橱柜","ˈkʌbɚd"],[23,"television","电视机","ˈteləvɪʒən"],[23,"floor","地板","flɔːr"],[23,"dressing table","梳妆台","ˈdresɪŋ ˌteɪbəl"],[23,"magazine","杂志","ˈmæɡəziːn"],[23,"bed","床","bed"],[23,"newspaper","报纸","ˈnuːzˌpeɪpɚ"],[25,"Mrs","夫人","ˈmɪsɪz"],[25,"kitchen","厨房","ˈkɪtʃən"],[25,"refrigerator","电冰箱","rɪˈfrɪdʒəreɪt̬ɚ"],[25,"electric","电的","iˈlektrɪk"],[25,"left","左边","left"],[25,"cooker","炉子","ˈkʊkɚ"],[25,"right","右边","raɪt"],[25,"middle","中间","ˈmɪdəl"],[25,"of","…的","əv"],[25,"room","房间","ruːm"],[25,"where","在哪里","wer"],[27,"living room","客厅","ˈlɪvɪŋ ruːm"],[27,"near","靠近","nɪr"],[27,"window","窗户","ˈwɪndoʊ"],[27,"armchair","扶手椅","ˈɑːrmtʃer"],[27,"door","门","dɔːr"],[27,"picture","图画","ˈpɪktʃɚ"],[27,"wall","墙","wɑːl"],[29,"shut","关门","ʃʌt"],[29,"bedroom","卧室","ˈbedruːm"],[29,"untidy","乱的","ʌnˈtaɪdi"],[29,"must","必须","mʌst"],[29,"open","打开","ˈoʊpən"],[29,"air","使通风","er"],[29,"put","放","pʊt"],[29,"clothes","衣服","kloʊðz"],[29,"wardrobe","衣柜","ˈwɔːrdroʊb"],[29,"dust","掸灰","dʌst"],[29,"sweep","扫","swiːp"],[29,"read","读","riːd"],[29,"throw","扔","θroʊ"],[29,"turn on","打开（电器）","tɝːn ˈɑːn"],[29,"turn off","关上（电器）","tɝːn ˈɑːf"],[31,"garden","花园","ˈɡɑːrdən"],[31,"under","在…之下","ˈʌndɚ"],[31,"tree","树","triː"],[31,"climb","爬","klaɪm"],[31,"who","谁","huː"],[31,"run","跑","rʌn"],[31,"grass","草地","ɡræs"],[31,"after","在…之后","ˈæftɚ"],[31,"across","横过","əˈkrɑːs"],[31,"cat","猫","kæt"],[31,"eat","吃","iːt"],[31,"type","打字","taɪp"],[31,"wash","洗","wɑːʃ"],[31,"cook","做饭","kʊk"],[31,"cry","哭","kraɪ"],[31,"wait","等","weɪt"],[31,"jump","跳","dʒʌmp"],[33,"day","日子","deɪ"],[33,"cloud","云","klaʊd"],[33,"shine","照耀","ʃaɪn"],[33,"sun","太阳","sʌn"],[33,"with","和…一起","wɪð"],[33,"family","家庭","ˈfæməli"],[33,"walk","散步","wɑːk"],[33,"over","跨越","ˈoʊvɚ"],[33,"bridge","桥","brɪdʒ"],[33,"boat","船","boʊt"],[33,"river","河","ˈrɪvɚ"],[33,"ship","轮船","ʃɪp"],[33,"aeroplane","飞机","ˈerəpleɪn"],[33,"sky","天空","skaɪ"],[35,"photograph","照片","ˈfoʊt̬əɡræf"],[35,"village","村庄","ˈvɪlɪdʒ"],[35,"valley","山谷","ˈvæli"],[35,"between","在…之间","bɪˈtwiːn"],[35,"hill","小山","hɪl"],[35,"another","另一个","əˈnʌðɚ"],[35,"wife","妻子","waɪf"],[35,"along","沿着","əˈlɑːŋ"],[35,"bank","河岸","bæŋk"],[35,"water","水","ˈwɑːt̬ɚ"],[35,"swim","游泳","swɪm"],[35,"building","建筑物","ˈbɪldɪŋ"],[35,"park","公园","pɑːrk"],[35,"into","进入","ˈɪntuː"],[35,"beside","在…旁边","bɪˈsaɪd"],[35,"off","离开","ɑːf"],[37,"work","工作","wɝːk"],[37,"hard","努力地","hɑːrd"],[37,"make","做","meɪk"],[37,"bookcase","书架","ˈbʊkkeɪs"],[37,"going to","将要","ˈɡoʊɪŋ tuː"],[37,"paint","上漆","peɪnt"],[37,"pink","粉红色","pɪŋk"],[37,"favourite","最喜欢的","ˈfeɪvərɪt"],[37,"homework","作业","ˈhoʊmwɝːk"],[37,"listen","听","ˈlɪsən"],[37,"dish","盘子","dɪʃ"],[39,"front","前面","frʌnt"],[39,"in front of","在…之前","ɪn ˈfrʌnt əv"],[39,"careful","小心的","ˈkerfəl"],[39,"vase","花瓶","veɪs"],[39,"drop","掉下","drɑːp"],[39,"flower","花","ˈflaʊɚ"],[39,"show","给…看","ʃoʊ"],[39,"send","送，寄","send"],[39,"take","带走","teɪk"],[41,"cheese","奶酪","tʃiːz"],[41,"bread","面包","bred"],[41,"soap","肥皂","soʊp"],[41,"chocolate","巧克力","ˈtʃɑːklət"],[41,"sugar","糖","ˈʃʊɡɚ"],[41,"coffee","咖啡","ˈkɑːfi"],[41,"tea","茶","tiː"],[41,"tobacco","烟草","təˈbækoʊ"],[41,"a bar of","一块，一条","ə ˈbɑːr əv"],[41,"a loaf of","一个（面包）","ə ˈloʊf əv"],[41,"a pound of","一磅","ə ˈpaʊnd əv"],[43,"can","能，会","kæn"],[43,"of course","当然","əv ˈkɔːrs"],[43,"now","现在","naʊ"],[43,"find","找到","faɪnd"],[43,"kettle","水壶","ˈket̬əl"],[43,"behind","在…之后","bɪˈhaɪnd"],[43,"teapot","茶壶","ˈtiːpɑːt"],[43,"boil","沸腾","bɔɪl"],[45,"boss","老板","bɑːs"],[45,"minute","分钟","ˈmɪnɪt"],[45,"ask","请求","æsk"],[45,"handwriting","书写","ˈhændˌraɪt̬ɪŋ"],[45,"terrible","糟糕的","ˈterəbəl"],[45,"lift","提起","lɪft"],[47,"like","喜欢","laɪk"],[47,"want","想要","wɑːnt"],[47,"fresh","新鲜的","freʃ"],[47,"egg","鸡蛋","eɡ"],[47,"butter","黄油","ˈbʌt̬ɚ"],[47,"pure","纯的","pjʊr"],[47,"honey","蜂蜜","ˈhʌni"],[47,"ripe","熟的","raɪp"],[47,"banana","香蕉","bəˈnænə"],[47,"jam","果酱","dʒæm"],[47,"sweet","甜的","swiːt"],[47,"orange","橙子","ˈɔːrɪndʒ"],[47,"wine","葡萄酒","waɪn"],[47,"beer","啤酒","bɪr"],[49,"butcher","卖肉的","ˈbʊtʃɚ"],[49,"meat","肉","miːt"],[49,"beef","牛肉","biːf"],[49,"lamb","羊肉","læm"],[49,"husband","丈夫","ˈhʌzbənd"],[49,"steak","牛排","steɪk"],[49,"mince","肉末","mɪns"],[49,"chicken","鸡肉","ˈtʃɪkɪn"],[49,"tell","告诉","tel"],[49,"truth","实情","truːθ"],[49,"either","也（用于否定）","ˈiːðɚ"],[49,"tomato","西红柿","təˈmeɪt̬oʊ"],[49,"potato","土豆","pəˈteɪt̬oʊ"],[49,"cabbage","卷心菜","ˈkæbɪdʒ"],[49,"pear","梨","per"],[49,"grape","葡萄","ɡreɪp"],[49,"peach","桃","piːtʃ"],[51,"Greece","希腊","ɡriːs"],[51,"climate","气候","ˈklaɪmət"],[51,"country","国家","ˈkʌntri"],[51,"pleasant","宜人的","ˈplezənt"],[51,"weather","天气","ˈweðɚ"],[51,"spring","春天","sprɪŋ"],[51,"windy","有风的","ˈwɪndi"],[51,"warm","温暖的","wɔːrm"],[51,"rain","下雨","reɪn"],[51,"sometimes","有时","ˈsʌmtaɪmz"],[51,"summer","夏天","ˈsʌmɚ"],[51,"autumn","秋天","ˈɑːt̬əm"],[51,"winter","冬天","ˈwɪnt̬ɚ"],[51,"snow","下雪","snoʊ"],[51,"January","一月","ˈdʒænjueri"],[51,"April","四月","ˈeɪprəl"],[51,"July","七月","dʒʊˈlaɪ"],[51,"October","十月","ɑːkˈtoʊbɚ"],[53,"interesting","有趣的","ˈɪntrəstɪŋ"],[53,"subject","话题","ˈsʌbdʒekt"],[53,"conversation","谈话","ˌkɑːnvɚˈseɪʃən"],[53,"mild","温和的","maɪld"],[53,"always","总是","ˈɑːlweɪz"],[53,"north","北方","nɔːrθ"],[53,"east","东方","iːst"],[53,"wet","潮湿的","wet"],[53,"west","西方","west"],[53,"south","南方","saʊθ"],[53,"season","季节","ˈsiːzən"],[53,"best","最好地","best"],[53,"night","夜晚","naɪt"],[53,"rise","升起","raɪz"],[53,"early","早","ˈɝːli"],[53,"set","落下","set"],[53,"late","晚","leɪt"],[55,"live","居住","lɪv"],[55,"stay","待在","steɪ"],[55,"home","家","hoʊm"],[55,"housework","家务","ˈhaʊswɝːk"],[55,"lunch","午饭","lʌntʃ"],[55,"afternoon","下午","ˌæftɚˈnuːn"],[55,"usually","通常","ˈjuːʒuəli"],[55,"together","一起","təˈɡeðɚ"],[55,"evening","晚上","ˈiːvnɪŋ"],[55,"arrive","到达","əˈraɪv"],[55,"night","夜间","naɪt"],[57,"o'clock","…点钟","əˈklɑːk"],[57,"shop","商店","ʃɑːp"],[57,"moment","片刻","ˈmoʊmənt"],[57,"at the moment","此刻","æt ðə ˈmoʊmənt"],[59,"envelope","信封","ˈenvəloʊp"],[59,"writing paper","信纸","ˈraɪt̬ɪŋ ˌpeɪpɚ"],[59,"shop assistant","店员","ˈʃɑːp əˌsɪstənt"],[59,"size","尺寸","saɪz"],[59,"pad","便笺本","pæd"],[59,"glue","胶水","ɡluː"],[59,"chalk","粉笔","tʃɑːk"],[59,"change","零钱","tʃeɪndʒ"],[61,"feel","感觉","fiːl"],[61,"look","看起来","lʊk"],[61,"must","必须","mʌst"],[61,"call","叫","kɑːl"],[61,"doctor","医生","ˈdɑːktɚ"],[61,"telephone","打电话","ˈteləfoʊn"],[61,"remember","记得","rɪˈmembɚ"],[61,"mouth","嘴","maʊθ"],[61,"tongue","舌头","tʌŋ"],[61,"bad","严重的","bæd"],[61,"cold","感冒","koʊld"],[61,"news","消息","nuːz"],[63,"better","更好的","ˈbet̬ɚ"],[63,"certainly","当然","ˈsɝːtənli"],[63,"get up","起床","ɡet ˈʌp"],[63,"yet","还","jet"],[63,"rich","油腻的","rɪtʃ"],[63,"food","食物","fuːd"],[63,"remain","保持","rɪˈmeɪn"],[63,"quiet","安静的","ˈkwaɪət"],[65,"key","钥匙","kiː"],[65,"baby","婴儿","ˈbeɪbi"],[65,"play","玩","pleɪ"],[65,"enjoy","享受","ɪnˈdʒɔɪ"],[65,"myself","我自己","maɪˈself"],[65,"yourself","你自己","jʊrˈself"],[65,"themselves","他们自己","ðəmˈselvz"],[67,"absent","缺席的","ˈæbsənt"],[67,"keep","留在","kiːp"],[67,"weekend","周末","ˈwiːkend"],[67,"Monday","星期一","ˈmʌndeɪ"],[67,"Saturday","星期六","ˈsæt̬ɚdeɪ"],[67,"Sunday","星期日","ˈsʌndeɪ"],[67,"greengrocer","蔬菜水果商","ˈɡriːnˌɡroʊsɚ"],[67,"church","教堂","tʃɝːtʃ"],[67,"country","乡下","ˈkʌntri"],[67,"lucky","幸运的","ˈlʌki"],[69,"year","年","jɪr"],[69,"race","比赛","reɪs"],[69,"town","城镇","taʊn"],[69,"crowd","人群","kraʊd"],[69,"stand","站立","stænd"],[69,"exciting","令人兴奋的","ɪkˈsaɪt̬ɪŋ"],[69,"just","正好","dʒʌst"],[69,"finish","终点","ˈfɪnɪʃ"],[69,"winner","获胜者","ˈwɪnɚ"],[69,"behind","在…之后","bɪˈhaɪnd"],[69,"way","路途","weɪ"],[71,"awful","讨厌的","ˈɑːfəl"],[71,"telephone","打电话","ˈteləfoʊn"],[71,"time","次","taɪm"],[71,"answer","接（电话）","ˈænsɚ"],[71,"last","上一个的","læst"],[71,"week","星期","wiːk"]];
+
+const ICON={
+ speak:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h3l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+ star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg>',
+ starOn:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg>'
+};
+/* 英美拼写互认：教材用英式，美式拼写同样判对 */
+const VARIANT={colour:["color"],grey:["gray"],favourite:["favorite"],centre:["center"],neighbour:["neighbor"],programme:["program"],theatre:["theater"],metre:["meter"],cheque:["check"],aeroplane:["airplane"],"mr.":["mr"],"mrs.":["mrs"],"hard-working":["hardworking","hard working"],"o'clock":["oclock"]};
+const STEPS=[1,3,7,14,30];
+const MODE={L:"听音",C:"中文"};
+const KEY="nce-dictation-v1";
+
+/* ---------- storage ---------- */
+function blank(){return{app:"nce-dictation",v:1,custom:[],prog:{},book:{},days:{},settings:{accent:"US",rate:1,voice:"",count:10,order:"seq",mode:"L",filter:"all",lessons:[1]}}}
+let db=blank(), canSave=true;
+try{const s=localStorage.getItem(KEY); if(s){const o=JSON.parse(s); if(o&&o.v===1){db=Object.assign(blank(),o);db.settings=Object.assign(blank().settings,o.settings||{});}}}catch(e){canSave=false}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));canSave=true}catch(e){canSave=false}}
+
+/* ---------- dates (local) ---------- */
+function ds(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today(){return ds(new Date())}
+function addDays(s,n){const [y,m,d]=s.split("-").map(Number);return ds(new Date(y,m-1,d+n))}
+
+/* ---------- word list ---------- */
+let W=new Map();
+function norm(s){return String(s).trim().toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g," ")}
+function buildWords(){
+  W=new Map();
+  const put=(lesson,en,zh,ipa,custom)=>{
+    const k=norm(en); if(!k) return;
+    let w=W.get(k);
+    if(!w){w={key:k,en:en.trim(),zh:[],ipa:ipa||"",lessons:[],custom:!!custom};W.set(k,w)}
+    if(zh && !w.zh.includes(zh)) w.zh.push(zh);
+    if(lesson && !w.lessons.includes(lesson)) w.lessons.push(lesson);
+    if(!w.ipa && ipa) w.ipa=ipa;
+    if(custom) w.custom=true;
+  };
+  RAW.forEach(r=>put(r[0],r[1],r[2],r[3],false));
+  db.custom.forEach(r=>put(r.lesson||0,r.en,r.zh,r.ipa,true));
+  W.forEach(w=>w.lessons.sort((a,b)=>a-b));
+}
+buildWords();
+function zhOf(w){return w.zh.join("；")}
+function answers(w){const k=w.key;return [k,...(VARIANT[k]||[])].map(norm)}
+function lessonsAll(){const s=new Set();W.forEach(w=>w.lessons.forEach(l=>s.add(l)));return [...s].sort((a,b)=>a-b)}
+function lessonName(n){return n===0?"未分课":"Lesson "+n+(LT[n]?" · "+LT[n]:"")}
+
+/* ---------- progress ---------- */
+function P(k,m){db.prog[k]=db.prog[k]||{};return db.prog[k][m]=db.prog[k][m]||{s:0,due:null,n:0,ok1:0,wrong:0,hint:0,rev:0,last:null}}
+function peek(k,m){return db.prog[k]&&db.prog[k][m]}
+function status(k){const L=peek(k,"L"),C=peek(k,"C");if(!L&&!C)return"new";if(L&&C&&L.s>=3&&C.s>=3)return"mastered";return"learning"}
+const STATUS_ZH={new:"未学",learning:"学习中",mastered:"已掌握"};
+function dueItems(){const t=today(),out=[];Object.keys(db.prog).forEach(k=>{if(!W.has(k))return;["L","C"].forEach(m=>{const p=db.prog[k][m];if(p&&p.due&&p.due<=t)out.push({key:k,m})})});return out}
+function dayRec(){const t=today();return db.days[t]=db.days[t]||{w:{},att:0,ok1:0}}
+function recordOutcome(it,success){
+  if(it.retry) return;
+  const p=P(it.key,it.m),t=today();
+  p.n++;p.last=t;
+  if(success){p.ok1++;p.s++;p.due=addDays(t,STEPS[Math.min(p.s,5)-1])}
+  else{p.s=0;p.due=addDays(t,1)}
+  const d=dayRec();d.w[it.key]=1;d.att++;if(success)d.ok1++;
+  save();
+}
+function wrongTotal(k){const L=peek(k,"L"),C=peek(k,"C");return (L?L.wrong:0)+(C?C.wrong:0)}
+
+/* ---------- speech ---------- */
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices()||[]}catch(e){voices=[]}}
+if("speechSynthesis" in window){loadVoices();speechSynthesis.onvoiceschanged=()=>{loadVoices();if(view==="settings")render()}}
+function langWant(){return"en-US"}
+function isUS(v){return v.lang.replace("_","-").toLowerCase()==="en-us"}
+function pickVoice(){
+  if(!voices.length) return null;
+  if(db.settings.voice){const v=voices.find(v=>v.name===db.settings.voice&&isUS(v));if(v)return v}
+  const m=voices.filter(isUS);
+  const pref=["Samantha","Ava","Allison","Google US English","Alex","Microsoft Aria","Microsoft Jenny","Microsoft Guy"];
+  for(const n of pref){const v=m.find(v=>v.name.includes(n));if(v)return v}
+  return m[0]||null;
+}
+function speak(text){
+  if(!("speechSynthesis" in window)){toast("这个浏览器不支持语音播放，请换 Safari 或 Chrome");return}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    const v=pickVoice(); if(v)u.voice=v;
+    u.lang="en-US"; u.rate=db.settings.rate;
+    u.onerror=e=>{if(e.error!=="interrupted"&&e.error!=="canceled")toast("发音播放失败，请再点一次")};
+    speechSynthesis.speak(u);
+  }catch(e){toast("发音播放失败")}
+}
+
+/* ---------- ui helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let toastT;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2200)}
+function toggleBook(k){if(db.book[k])delete db.book[k];else db.book[k]=Date.now();save()}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pattern(en,reveal){let first=true;return en.split("").map(c=>{if(/[a-z]/i.test(c)){if(reveal&&first){first=false;return c}first=false;return"_"}return c===" "?" ":c}).join(" ")}
+
+/* ---------- routing ---------- */
+const TABS=[["today","今日"],["book","练习册"],["words","词库"],["stats","统计"],["settings","设置与备份"]];
+let view="today", S=null, ui={q:"",lesson:"",st:"all",bookLesson:"",confirm:null,importText:"",exportText:""};
+function go(v){view=v;S=null;render();window.scrollTo(0,0)}
+function renderTabs(){$("#tabs").innerHTML=TABS.map(([k,n])=>`<button data-tab="${k}" ${view===k&&!S?'aria-current="page"':""}>${n}${k==="book"?` <span class="muted small">${Object.keys(db.book).filter(k=>W.has(k)).length}</span>`:""}</button>`).join("")}
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)go(b.dataset.tab)});
+
+function render(){
+  renderTabs();
+  const a=$("#app");
+  if(S){a.innerHTML=S.done?vSummary():vPractice();bindPractice();return}
+  a.innerHTML=({today:vToday,book:vBook,words:vWords,stats:vStats,settings:vSettings})[view]();
+}
+
+/* ---------- 今日 ---------- */
+function vToday(){
+  const d=db.days[today()]||{w:{},att:0,ok1:0}, due=dueItems(), st=db.settings;
+  const mastered=[...W.keys()].filter(k=>status(k)==="mastered").length;
+  const bookN=Object.keys(db.book).filter(k=>W.has(k)).length;
+  const rate=d.att?Math.round(d.ok1/d.att*100)+"%":"—";
+  const lessons=lessonsAll(), sel=new Set(st.lessons);
+  const pool=buildPool(), n=st.count==="all"?pool.length:Math.min(pool.length,st.count);
+  return `
+  ${canSave?"":`<div class="notice">这个浏览器现在不允许保存数据，练习记录不会留下。请换普通窗口打开，或练完到「设置与备份」复制备份。</div>`}
+  <section class="stats">
+    <div class="stat"><b>${Object.keys(d.w).length}</b><span>今日已练</span></div>
+    <div class="stat"><b>${rate}</b><span>今日首次正确率</span></div>
+    <div class="stat"><b>${due.length}</b><span>待复习（题）</span></div>
+    <div class="stat"><b>${bookN}</b><span>练习册</span></div>
+    <div class="stat"><b>${mastered}</b><span>已掌握</span></div>
+  </section>
+  <section class="panel due">
+    <div><p><b>今日复习</b></p><p class="muted small">${due.length?`到期 ${due.length} 题，按上次的方式（听音或中文）分别复习。`:"今天没有到期的单词。"}</p></div>
+    <button class="btn primary" data-act="start-due" ${due.length?"":"disabled"}>开始复习</button>
+  </section>
+  <section class="panel">
+    <h2>新的一组</h2>
+    <div class="field"><div class="lab">课次 <span class="muted">（可多选，${sel.size} 课）</span>
+      <button class="link small" data-act="les-all">全选</button> · <button class="link small" data-act="les-none">清空</button></div>
+      <div class="chips">${lessons.map(l=>`<button class="chip" title="${esc(lessonName(l))}" data-les="${l}" aria-pressed="${sel.has(l)}">${l===0?"其他":"L"+l}</button>`).join("")}</div>
+      <div class="muted small">${sel.size===1?esc(lessonName([...sel][0])):""}</div>
+    </div>
+    <div class="field"><div class="lab">默写方式</div>${seg("mode",[["L","听音默写"],["C","中文默写"],["M","混合"]],st.mode)}</div>
+    <div class="row" style="gap:24px;align-items:flex-start">
+      <div class="field"><div class="lab">题量</div>${seg("count",[[10,"10"],[20,"20"],["all","全部"]],st.count)}</div>
+      <div class="field"><div class="lab">顺序</div>${seg("order",[["seq","按课文"],["rand","随机"]],st.order)}</div>
+      <div class="field"><div class="lab">范围</div>${seg("filter",[["all","全部"],["new","未学过"],["seen","学过的"]],st.filter)}</div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span class="muted small">本组 ${n} 个单词</span>
+      <button class="btn primary" data-act="start-new" ${n?"":"disabled"}>开始默写</button>
+    </div>
+  </section>`;
+}
+function seg(name,opts,cur){return `<div class="seg" role="group">${opts.map(([v,l])=>`<button data-seg="${name}" data-v="${v}" aria-pressed="${String(cur)===String(v)}">${l}</button>`).join("")}</div>`}
+function buildPool(){
+  const st=db.settings,sel=new Set(st.lessons);
+  let ws=[...W.values()].filter(w=>w.lessons.some(l=>sel.has(l)));
+  if(st.filter==="new")ws=ws.filter(w=>status(w.key)==="new");
+  if(st.filter==="seen")ws=ws.filter(w=>status(w.key)!=="new");
+  ws.sort((a,b)=>Math.min(...a.lessons.filter(l=>sel.has(l)))-Math.min(...b.lessons.filter(l=>sel.has(l))));
+  return ws;
+}
+function pickMode(k,mode){if(mode!=="M")return mode;const L=peek(k,"L"),C=peek(k,"C");const a=L?L.s:-1,b=C?C.s:-1;if(a===b)return Math.random()<.5?"L":"C";return a<b?"L":"C"}
+function startSession(items,label,opts={}){
+  if(!items.length){toast("这一组没有单词");return}
+  S={items:items.map(x=>({key:x.key,m:x.m,tries:0,wrong:0,hint:false,rev:false,outcome:null,done:false,last:"",retry:!!opts.retry})),i:0,label,done:false,retry:!!opts.retry};
+  render();
+}
+
+/* ---------- practice ---------- */
+function cur(){return S.items[S.i]}
+function vPractice(){
+  const it=cur(),w=W.get(it.key),n=S.items.length;
+  const fin=it.done, inBook=!!db.book[it.key];
+  let prompt="";
+  if(it.m==="L"){
+    prompt=`<button class="speak" data-act="play" aria-label="播放发音">${ICON.speak}</button>
+      <div class="muted small">${w.key.includes(" ")?"这是一个词组 · ":""}${noVoiceNote()}</div>`;
+  }else{
+    prompt=`<div class="prompt-zh">${esc(zhOf(w))}</div>
+      <div class="pattern">${esc(pattern(w.en,it.hint))}</div>
+      <div class="muted small">${esc(w.lessons.map(l=>l?"L"+l:"自定义").join(" / "))}</div>`;
+  }
+  const fbCls=it.fb?it.fb[0]:"",fbTxt=it.fb?it.fb[1]:"";
+  return `
+  <section>
+    <div class="pbar"><div class="row"><span class="tag">${MODE[it.m]}默写</span><span class="muted small">${esc(S.label)}</span></div>
+      <div class="row"><span class="muted small" style="font-variant-numeric:tabular-nums">${S.i+1} / ${n}</span><button class="btn" data-act="quit">结束</button></div></div>
+    <div class="track"><i style="width:${(S.i)/n*100}%"></i></div>
+  </section>
+  <section class="card">
+    ${prompt}
+    <input id="ans" class="answer-in ${fin?(it.outcome?"good":""):""}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${fin?"next":"done"}" aria-label="输入英文" value="${esc(it.last)}" ${fin?"readonly":""}>
+    <div class="fb ${fbCls}" aria-live="polite">${esc(fbTxt)}</div>
+    ${fin?`<div class="reveal"><div class="en">${esc(w.en)}</div>${w.ipa?`<div class="ipa">/${esc(w.ipa)}/</div>`:""}<div>${esc(zhOf(w))}</div>
+      <div class="row" style="justify-content:center;margin-top:6px"><button class="icon-btn" data-act="play" aria-label="播放">${ICON.speak}</button></div></div>`:""}
+    <div class="actions">
+      ${fin?`<button class="btn primary" data-act="next">${S.i+1<n?"下一题":"看结果"}</button>`
+        :`<button class="btn primary" data-act="check">检查</button>
+          ${it.m==="C"?`<button class="btn" data-act="hint" ${it.hint?"disabled":""}>首字母提示</button>`:""}
+          <button class="btn ${it.wrong>=2?"warn":""}" data-act="reveal">显示答案</button>`}
+      <button class="star" data-act="book" aria-pressed="${inBook}">${inBook?ICON.starOn:ICON.star}${inBook?"已在练习册":"加入练习册"}</button>
+    </div>
+    <div class="keys">${fin?`<kbd>Enter</kbd> 下一题 · <kbd>Esc</kbd> 再听一遍 · <kbd>Ctrl</kbd>+<kbd>B</kbd> 练习册`
+      :`<kbd>Enter</kbd> 检查 · <kbd>Esc</kbd> ${it.m==="L"?"重播":"听发音（算提示）"} · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 显示答案 · <kbd>Ctrl</kbd>+<kbd>B</kbd> 练习册`}</div>
+  </section>`;
+}
+function noVoiceNote(){if(!("speechSynthesis" in window))return"此浏览器不支持语音";if(voices.length&&!pickVoice())return"系统里没有美式语音，见「设置」里的说明";return"点按喇叭或按 Esc 重播"}
+function bindPractice(){
+  const inp=$("#ans");if(inp){inp.focus();const it=cur();if(it&&!it.done&&it.m==="L"&&!it.played){it.played=true;speak(W.get(it.key).en)}}
+}
+function act(a){
+  const it=S&&!S.done?cur():null;
+  if(a==="play"&&it){
+    if(it.m==="C"&&!it.done){ if(!it.hint){it.hint=true;it.heard=true;P(it.key,"C").hint++;if(it.outcome===null){it.outcome=false;recordOutcome(it,false)}it.fb=["","中文默写中听了发音，这题按提示计，不算首次正确"]} save(); render(); }
+    speak(W.get(it.key).en);return;
+  }
+  if(a==="check"&&it)return check();
+  if(a==="hint"&&it&&!it.hint){it.hint=true;P(it.key,it.m).hint++;if(it.outcome===null){it.outcome=false;recordOutcome(it,false)}save();it.last=$("#ans").value;render();return}
+  if(a==="reveal"&&it&&!it.done){it.rev=true;it.done=true;P(it.key,it.m).rev++;if(it.outcome===null){it.outcome=false;recordOutcome(it,false)}it.last=$("#ans").value;it.fb=["bad",it.wrong?`你写的是「${it.last}」`:"已显示答案，这题按答错计"];save();render();if(it.m==="C")speak(W.get(it.key).en);return}
+  if(a==="next"&&it){S.i++;if(S.i>=S.items.length)S.done=true;render();return}
+  if(a==="book"&&S){const k=S.done?null:cur().key;if(k){toggleBook(k);const v=$("#ans")?.value;if(v!==undefined)cur().last=v;render()}return}
+  if(a==="quit"){const did=S.items.filter(x=>x.outcome!==null).length;S=null;render();if(did)toast(`已练 ${did} 题，记录已保存`);return}
+}
+function check(){
+  const it=cur(),w=W.get(it.key),inp=$("#ans"),v=norm(inp.value);
+  if(!v){inp.focus();return}
+  it.tries++;it.last=inp.value;
+  const ok=answers(w).includes(v);
+  if(ok){
+    if(it.outcome===null){it.outcome=!it.hint;recordOutcome(it,!it.hint)}
+    it.done=true;
+    it.fb=["good",it.outcome?"正确":(it.hint?"拼对了 · 用过提示，不算首次正确":"拼对了 · 首次没对，按错题复习")];
+    save();render();speak(w.en);
+  }else{
+    it.wrong++;if(!it.retry){P(it.key,it.m).wrong++}
+    if(it.outcome===null){it.outcome=false;recordOutcome(it,false)}
+    save();
+    it.fb=["bad",`不对，再试一次${it.wrong>1?`（已错 ${it.wrong} 次）`:""}`];
+    render();const n=$("#ans");n.classList.add("bad");n.select();
+  }
+}
+function vSummary(){
+  const all=S.items,ok=all.filter(x=>x.outcome===true),bad=all.filter(x=>x.outcome===false);
+  const rate=all.length?Math.round(ok.length/all.length*100):0;
+  return `<section><h2>${S.retry?"错词重练结束（不计入统计）":"本组结束"}</h2>
+  <div class="sum"><div><b>${ok.length}</b><span>首次正确</span></div><div><b>${bad.length}</b><span>首次未通过</span></div><div><b>${rate}%</b><span>首次正确率</span></div></div></section>
+  ${bad.length?`<section><div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">需要再看的词</h2><button class="link" data-act="book-all-bad">全部加入练习册</button></div>
+    <div class="list">${bad.map(x=>wordRow(W.get(x.key),`${MODE[x.m]} · 错 ${x.wrong} 次${x.hint?" · 用了提示":""}${x.rev?" · 看了答案":""}`)).join("")}</div></section>`:""}
+  <section class="row">${bad.length?`<button class="btn primary" data-act="retry">把错的再练一遍</button>`:""}<button class="btn" data-act="home">回到今日</button></section>
+  ${bad.length&&!S.retry?`<p class="muted small">再练一遍只帮你当场巩固，不改变复习日期。这些词明天会自动出现在复习里。</p>`:""}`;
+}
+function wordRow(w,extra){
+  const st=status(w.key),on=!!db.book[w.key];
+  return `<div class="item"><div class="w"><div><span class="en">${esc(w.en)}</span>${w.ipa?`<span class="ipa">/${esc(w.ipa)}/</span>`:""}</div>
+    <div class="zh">${esc(zhOf(w))}</div>
+    <div class="meta">${esc(w.lessons.map(l=>l?"L"+l:"自定义").join(" / "))} · <span class="pill ${st}">${STATUS_ZH[st]}</span>${extra?" · "+esc(extra):""}</div></div>
+    <div class="ops"><button class="icon-btn" data-say="${esc(w.key)}" aria-label="播放 ${esc(w.en)}">${ICON.speak}</button>
+    <button class="icon-btn ${on?"on":""}" data-bk="${esc(w.key)}" aria-label="${on?"移出练习册":"加入练习册"}" aria-pressed="${on}">${on?ICON.starOn:ICON.star}</button></div></div>`;
+}
+
+/* ---------- 练习册 ---------- */
+function vBook(){
+  let ks=Object.keys(db.book).filter(k=>W.has(k)).sort((a,b)=>db.book[b]-db.book[a]);
+  const les=[...new Set(ks.flatMap(k=>W.get(k).lessons))].sort((a,b)=>a-b);
+  if(ui.bookLesson!=="")ks=ks.filter(k=>W.get(k).lessons.includes(+ui.bookLesson));
+  return `<section class="panel"><h2>练习册 · ${ks.length} 个</h2>
+    <p class="muted small">不熟的、犹豫过的词都放这里。随时可以练，不受复习日期限制。确实会了，点「已掌握」移出。</p>
+    <div class="row">${[["L","听音默写"],["C","中文默写"],["M","混合"]].map(([m,l])=>`<button class="btn ${m==="L"?"primary":""}" data-bookstart="${m}" ${ks.length?"":"disabled"}>${l}</button>`).join("")}</div></section>
+  <section>
+    <div class="toolbar"><select class="sel" id="bookLesson" aria-label="按课筛选"><option value="">全部课次</option>${les.map(l=>`<option value="${l}" ${String(l)===ui.bookLesson?"selected":""}>${esc(lessonName(l))}</option>`).join("")}</select></div>
+    ${ks.length?`<div class="list">${ks.map(k=>{const w=W.get(k),L=peek(k,"L"),C=peek(k,"C");const n=(L?L.n:0)+(C?C.n:0);
+      return `<div class="item"><div class="w"><div><span class="en">${esc(w.en)}</span>${w.ipa?`<span class="ipa">/${esc(w.ipa)}/</span>`:""}</div><div class="zh">${esc(zhOf(w))}</div>
+      <div class="meta">${esc(w.lessons.map(l=>l?"L"+l:"自定义").join(" / "))} · 练 ${n} 次 · 错 ${wrongTotal(k)} 次${L?` · 听音连对 ${L.s}`:""}${C?` · 中文连对 ${C.s}`:""}</div></div>
+      <div class="ops"><button class="icon-btn" data-say="${esc(k)}" aria-label="播放">${ICON.speak}</button><button class="btn small" data-bk="${esc(k)}">已掌握</button></div></div>`}).join("")}</div>`
+    :`<div class="list"><div class="empty">练习册还是空的。默写时点「加入练习册」，或在词库里点星标。</div></div>`}
+  </section>`;
+}
+
+/* ---------- 词库 ---------- */
+function vWords(){
+  let ws=[...W.values()];
+  const q=norm(ui.q);
+  if(q)ws=ws.filter(w=>w.key.includes(q)||zhOf(w).includes(ui.q.trim()));
+  if(ui.lesson!=="")ws=ws.filter(w=>w.lessons.includes(+ui.lesson));
+  if(ui.st!=="all")ws=ws.filter(w=>status(w.key)===ui.st);
+  ws.sort((a,b)=>a.lessons[0]-b.lessons[0]);
+  const shown=ws.slice(0,200);
+  return `<section>
+    <div class="toolbar"><input id="q" type="search" placeholder="搜英文或中文" value="${esc(ui.q)}" aria-label="搜索">
+      <select class="sel" id="fl" aria-label="课次"><option value="">全部课次</option>${lessonsAll().map(l=>`<option value="${l}" ${String(l)===ui.lesson?"selected":""}>${esc(lessonName(l))}</option>`).join("")}</select>
+      <select class="sel" id="fs" aria-label="状态">${[["all","全部状态"],["new","未学"],["learning","学习中"],["mastered","已掌握"]].map(([v,l])=>`<option value="${v}" ${ui.st===v?"selected":""}>${l}</option>`).join("")}</select></div>
+    <p class="muted small">共 ${ws.length} 个${ws.length>200?"，只显示前 200 个，可以搜索或选课缩小范围":""}。已掌握 = 听音、中文两种方式都连续 3 次首次答对。</p>
+    <div class="list">${shown.length?shown.map(w=>wordRow(w,w.custom?"自定义":"")).join(""):`<div class="empty">没有符合条件的单词</div>`}</div>
+  </section>
+  <section class="panel"><h2>添加单词</h2>
+    <div class="form"><input id="nEn" placeholder="英文" aria-label="英文"><input id="nZh" placeholder="中文释义" aria-label="中文"><input id="nL" inputmode="numeric" placeholder="课次，如 73" aria-label="课次"><input id="nIpa" placeholder="音标（可空）" aria-label="音标"></div>
+    <div class="row" style="margin-top:10px"><button class="btn primary" data-act="add-word">添加</button><span class="muted small">同一个英文在多课出现会合并成一个词，课次和释义会叠加。</span></div>
+  </section>
+  <section class="panel"><h2>批量导入 CSV</h2>
+    <p class="small">每行一个词，顺序是 <code>英文,中文,课次,音标</code>，音标可以不填。中文里有逗号时用中文逗号，或用英文双引号把整格括起来。</p>
+    <textarea id="csv" spellcheck="false" placeholder="supermarket,超市,73,ˈsuːpɚˌmɑːrkɪt&#10;stay,停留,73,&#10;&quot;bus stop&quot;,公共汽车站,73,"></textarea>
+    <div class="row" style="margin-top:10px"><button class="btn primary" data-act="csv">导入</button><label class="btn" for="csvFile">选择 CSV 文件</label><input type="file" id="csvFile" accept=".csv,.txt,text/csv" hidden></div>
+  </section>
+  ${db.custom.length?`<section class="panel"><h2>自定义单词 · ${db.custom.length}</h2><div class="list">${db.custom.map((r,i)=>`<div class="item"><div class="w"><span class="en">${esc(r.en)}</span> <span class="small">${esc(r.zh)}</span> <span class="meta">${r.lesson?"L"+r.lesson:""}</span></div><div class="ops"><button class="btn small warn" data-delc="${i}">删除</button></div></div>`).join("")}</div></section>`:""}`;
+}
+function parseCSV(text){
+  const rows=[];text.replace(/\r/g,"").split("\n").forEach(line=>{if(!line.trim())return;const out=[];let f="",q=false;for(let i=0;i<line.length;i++){const c=line[i];if(q){if(c==='"'&&line[i+1]==='"'){f+='"';i++}else if(c==='"')q=false;else f+=c}else{if(c==='"')q=true;else if(c===","){out.push(f);f=""}else f+=c}}out.push(f);rows.push(out.map(s=>s.trim()))});
+  return rows;
+}
+function importRows(rows){
+  let ok=0,skip=0;
+  rows.forEach(r=>{const [en,zh,l,ipa]=r;if(!en||!zh||/^英文$|^english$/i.test(en)){skip++;return}const lesson=parseInt(l,10)||0;if(db.custom.some(c=>norm(c.en)===norm(en)&&c.lesson===lesson&&c.zh===zh)){skip++;return}db.custom.push({en,zh,lesson,ipa:ipa||""});ok++});
+  save();buildWords();render();toast(`导入 ${ok} 个${skip?`，跳过 ${skip} 行`:""}`);
+}
+
+/* ---------- 统计 ---------- */
+function vStats(){
+  const days=[];for(let i=13;i>=0;i--){const k=addDays(today(),-i);days.push([k,db.days[k]])}
+  const max=Math.max(1,...days.map(d=>d[1]?d[1].att:0));
+  const ks=[...W.keys()];
+  const cnt=m=>ks.filter(k=>{const p=peek(k,m);return p&&p.s>=3}).length;
+  const top=ks.filter(k=>wrongTotal(k)>0).sort((a,b)=>wrongTotal(b)-wrongTotal(a)).slice(0,15);
+  const totalAtt=Object.values(db.days).reduce((s,d)=>s+d.att,0),totalOk=Object.values(db.days).reduce((s,d)=>s+d.ok1,0);
+  return `<section class="stats" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat"><b>${ks.filter(k=>status(k)!=="new").length}</b><span>练过的词</span></div>
+    <div class="stat"><b>${cnt("L")}</b><span>听音已稳</span></div>
+    <div class="stat"><b>${cnt("C")}</b><span>中文已稳</span></div>
+    <div class="stat"><b>${totalAtt?Math.round(totalOk/totalAtt*100)+"%":"—"}</b><span>累计首次正确率</span></div></section>
+  <p class="muted small">「已稳」= 该方式连续 3 次首次答对（下次复习在 7 天以后）。两种都稳才算已掌握。</p>
+  <section class="panel"><h2>最近 14 天</h2><div class="bars">${days.map(([k,d])=>`<div class="r"><span class="muted">${k.slice(5)}</span><div class="b"><i style="width:${d?d.att/max*100:0}%"></i></div><span>${d?`${d.att} 题 · ${Math.round(d.ok1/d.att*100)}%`:"—"}</span></div>`).join("")}</div></section>
+  <section><h2>错得最多的词</h2>${top.length?`<div class="list">${top.map(k=>wordRow(W.get(k),`累计错 ${wrongTotal(k)} 次`)).join("")}</div>`:`<div class="list"><div class="empty">还没有错词记录</div></div>`}</section>`;
+}
+
+/* ---------- 设置与备份 ---------- */
+function vSettings(){
+  const st=db.settings;
+  const vs=voices.filter(isUS);
+  const auto=pickVoice();
+  const framed=(()=>{try{return window.top!==window.self}catch(e){return true}})();
+  return `<section class="panel"><h2>发音</h2>
+    <p class="small">只用美式英语（en-US）声音朗读，音标也是美式。</p>
+    <div class="field"><div class="lab">语速</div>${seg("rate",[[0.75,"0.75×"],[1,"正常"],[1.25,"1.25×"]],st.rate)}</div>
+    <div class="field"><label for="voice">声音</label>
+      <select class="sel" id="voice"><option value="">自动（${auto?esc(auto.name):"系统默认"}）</option>${vs.map(v=>`<option value="${esc(v.name)}" ${st.voice===v.name?"selected":""}>${esc(v.name)}</option>`).join("")}</select>
+      ${!("speechSynthesis" in window)?`<div class="notice">这个浏览器不支持语音合成，听音默写无法使用。</div>`:(voices.length&&!vs.length?`<div class="notice">这台设备没有美式英语声音，读出来可能是英式或其他口音。iPhone：设置 › 辅助功能 › 朗读内容 › 声音 › 英语，下载「美国」下的 Samantha 或 Ava（增强版）。电脑用 Chrome 会自带 Google US English。</div>`:"")}
+    </div>
+    <div class="row"><button class="btn" data-act="test-voice">试听 handbag</button><button class="btn" data-act="test-voice2">试听 Excuse me</button></div>
+  </section>
+  <section class="panel"><h2>备份</h2>
+    <p class="small">记录只存在当前这个浏览器里。换手机、换浏览器或清理网站数据之前，先复制备份，存到备忘录或微信文件传输助手。</p>
+    <div class="row"><button class="btn primary" data-act="export">生成备份</button>${ui.exportText?`<button class="btn" data-act="copy-export">复制</button>${framed?"":`<button class="btn" data-act="dl-export">下载文件</button>`}`:""}</div>
+    ${ui.exportText?`<textarea id="exp" readonly style="margin-top:10px">${esc(ui.exportText)}</textarea>`:""}
+    <h2 style="margin-top:20px">恢复</h2>
+    <textarea id="imp" spellcheck="false" placeholder="把备份内容粘贴到这里，或选择备份文件">${esc(ui.importText)}</textarea>
+    <div class="row" style="margin-top:10px">
+      ${ui.confirm==="import"?`<button class="btn warn" data-act="import-yes">确认覆盖当前记录</button><button class="btn" data-act="cancel">取消</button>`:`<button class="btn primary" data-act="import">恢复备份</button><label class="btn" for="impFile">选择备份文件</label><input type="file" id="impFile" accept=".json,application/json,.txt" hidden>`}
+    </div>
+  </section>
+  <section class="panel"><h2>清空</h2>
+    <p class="small muted">删除所有练习记录、练习册和自定义单词。建议先生成备份。</p>
+    ${ui.confirm==="reset"?`<div class="row"><button class="btn warn" data-act="reset-yes">确认清空，无法撤销</button><button class="btn" data-act="cancel">取消</button></div>`:`<button class="btn warn" data-act="reset">清空全部记录</button>`}
+  </section>
+  <p class="muted small">词库：L1–L71 共 ${RAW.length} 条，来自你的「新概念一册跟读」，含课文生词和练习补充词，不是完整教材词表；L73 以后需要按教材用 CSV 导入。</p>`;
+}
+function validBackup(o){return o&&o.app==="nce-dictation"&&o.v===1&&o.prog&&typeof o.prog==="object"&&o.book&&typeof o.book==="object"&&Array.isArray(o.custom)&&o.days&&typeof o.days==="object"}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  const d=t.dataset,st=db.settings;
+  if(d.seg){let v=d.v;if(d.seg==="count")v=v==="all"?"all":+v;if(d.seg==="rate")v=+v;st[d.seg]=v;save();render();if(d.seg==="rate")speak("handbag");return}
+  if(d.les!==undefined){const l=+d.les,s=new Set(st.lessons);s.has(l)?s.delete(l):s.add(l);st.lessons=[...s].sort((a,b)=>a-b);save();render();return}
+  if(d.say){speak(W.get(d.say).en);return}
+  if(d.bk){toggleBook(d.bk);render();return}
+  if(d.bookstart){const ks=Object.keys(db.book).filter(k=>W.has(k)&&(ui.bookLesson===""||W.get(k).lessons.includes(+ui.bookLesson)));startSession(shuffle(ks.map(k=>({key:k,m:pickMode(k,d.bookstart)}))),"练习册");return}
+  if(d.delc!==undefined){db.custom.splice(+d.delc,1);save();buildWords();render();return}
+  const a=d.act;if(!a)return;
+  if(S&&["play","check","hint","reveal","next","book","quit"].includes(a))return act(a);
+  switch(a){
+    case"les-all":st.lessons=lessonsAll();save();render();break;
+    case"les-none":st.lessons=[];save();render();break;
+    case"start-new":{let ws=buildPool();if(st.order==="rand")shuffle(ws);if(st.count!=="all")ws=ws.slice(0,st.count);
+      const lab=st.lessons.length===1?"Lesson "+st.lessons[0]:st.lessons.length+" 课";startSession(ws.map(w=>({key:w.key,m:pickMode(w.key,st.mode)})),lab);break}
+    case"start-due":startSession(shuffle(dueItems()),"今日复习");break;
+    case"retry":{const bad=S.items.filter(x=>x.outcome===false).map(x=>({key:x.key,m:x.m}));startSession(shuffle(bad),"错词重练",{retry:true});break}
+    case"home":S=null;view="today";render();break;
+    case"book-all-bad":S.items.filter(x=>x.outcome===false).forEach(x=>{if(!db.book[x.key])db.book[x.key]=Date.now()});save();render();toast("已加入练习册");break;
+    case"add-word":{const en=$("#nEn").value.trim(),zh=$("#nZh").value.trim();if(!en||!zh){toast("英文和中文都要填");return}db.custom.push({en,zh,lesson:parseInt($("#nL").value,10)||0,ipa:$("#nIpa").value.trim()});save();buildWords();render();toast("已添加 "+en);break}
+    case"csv":importRows(parseCSV($("#csv").value));break;
+    case"test-voice":speak("handbag");break;
+    case"test-voice2":speak("Excuse me");break;
+    case"export":ui.exportText=JSON.stringify(Object.assign({exportedAt:new Date().toISOString()},db));render();break;
+    case"copy-export":{const done=()=>toast("备份已复制");try{navigator.clipboard.writeText(ui.exportText).then(done,()=>{$("#exp").select();toast("请手动全选复制")})}catch(e){$("#exp").select();toast("请手动全选复制")}break}
+    case"dl-export":{const b=new Blob([ui.exportText],{type:"application/json"}),u=URL.createObjectURL(b),l=document.createElement("a");l.href=u;l.download="新概念单词本备份-"+today()+".json";l.click();setTimeout(()=>URL.revokeObjectURL(u),2000);break}
+    case"import":{ui.importText=$("#imp").value;let o;try{o=JSON.parse(ui.importText)}catch(e){toast("内容不是有效的备份，请完整粘贴");return}if(!validBackup(o)){toast("这不是新概念单词本的备份，或版本不对");return}ui.confirm="import";render();break}
+    case"import-yes":{const o=JSON.parse(ui.importText);db=Object.assign(blank(),o);delete db.exportedAt;db.settings=Object.assign(blank().settings,o.settings||{});save();buildWords();ui.confirm=null;ui.importText="";render();toast("已恢复备份");break}
+    case"reset":ui.confirm="reset";render();break;
+    case"reset-yes":db=blank();save();buildWords();ui.confirm=null;ui.exportText="";render();toast("已清空");break;
+    case"cancel":ui.confirm=null;render();break;
+  }
+});
+document.addEventListener("input",e=>{
+  const id=e.target.id;
+  if(id==="q"){if(e.isComposing)return;ui.q=e.target.value;const p=e.target.selectionStart;render();const q=$("#q");q.focus();q.setSelectionRange(p,p)}
+  if(id==="ans"){const it=S&&cur();if(it&&it.fb&&it.fb[0]==="bad"&&!it.done){e.target.classList.remove("bad");}}
+});
+document.addEventListener("compositionend",e=>{if(e.target.id==="q")e.target.dispatchEvent(new Event("input",{bubbles:true}))});
+document.addEventListener("change",e=>{
+  const id=e.target.id;
+  if(id==="fl"){ui.lesson=e.target.value;render()}
+  if(id==="fs"){ui.st=e.target.value;render()}
+  if(id==="bookLesson"){ui.bookLesson=e.target.value;render()}
+  if(id==="voice"){db.settings.voice=e.target.value;save();speak("handbag")}
+  if(id==="csvFile"||id==="impFile"){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{if(id==="csvFile")importRows(parseCSV(String(r.result)));else{ui.importText=String(r.result);render();toast("文件已读入，点「恢复备份」")}};r.readAsText(f)}
+});
+document.addEventListener("keydown",e=>{
+  if(!S||S.done)return;
+  const it=cur();
+  if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(!it.done)act("reveal");return}
+  if(e.key==="Enter"&&e.target.id==="ans"){e.preventDefault();if(e.isComposing)return;it.done?act("next"):check();return}
+  if(e.key==="Escape"){e.preventDefault();act("play");return}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="b"){e.preventDefault();act("book")}
+});
+document.addEventListener("keydown",e=>{if(S&&S.done&&e.key==="Enter"&&!e.target.closest("button")){e.preventDefault();S=null;view="today";render()}});
+render();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+</body></html>
